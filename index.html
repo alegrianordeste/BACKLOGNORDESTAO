@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BACKLOG NORDESTÃO</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--az:#1d4ed8;--az2:#1e3a8a;--azl:#e8efff;--vm:#8f1d2c;--bg:#f4f7ff;--tx:#14213d;--mut:#64748b;--ln:#dbe4f7}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0;font:600 15px Nunito,system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+button,input,select{font:inherit}button{cursor:pointer}input,select,textarea{font-size:16px}
+:focus-visible{outline:3px solid var(--vm);outline-offset:2px}
+.top{background:linear-gradient(120deg,var(--az2),var(--az));color:#fff;padding:14px 22px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;border-bottom:4px solid var(--vm)}
+.top h1{font-size:20px;margin:0;font-weight:800;flex:1}
+.nav{display:flex;gap:6px;padding:12px 22px;flex-wrap:wrap}
+.nav button{border:0;background:#fff;color:var(--az2);padding:9px 16px;border-radius:99px;font-weight:800;border:2px solid var(--ln);transition:.25s}
+.nav button.on{background:var(--az);color:#fff;border-color:var(--az)}
+.nav button:hover{transform:translateY(-2px)}
+.nav .btn.vm{background:var(--vm);color:#fff;border-color:var(--vm)}
+main{padding:0 22px 40px;max-width:1300px;margin:auto}
+.mes{display:flex;align-items:center;gap:10px;margin:6px 0 16px}
+.mes b{padding:9px 22px;border-radius:99px;color:#fff;min-width:190px;text-align:center;font-size:17px;transition:background .5s}
+.mes button,.btn{border:0;background:var(--az);color:#fff;border-radius:99px;padding:9px 16px;font-weight:800;transition:.2s}
+.mes button{width:40px;height:40px;padding:0;font-size:20px}
+.btn:hover,.mes button:hover{background:var(--az2);transform:scale(1.05)}
+.btn.vm{background:var(--vm)}.btn.gh{background:#fff;color:var(--az);border:2px solid var(--az)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:12px}
+.kpi{background:#fff;border-radius:20px;padding:16px;border:2px solid var(--ln);text-align:left;color:var(--tx);animation:pop .5s both}
+.kpi:hover{border-color:var(--az);transform:translateY(-3px)}.kpi{transition:.25s}
+.kpi small{color:var(--mut);font-weight:700;display:block}.kpi strong{font-size:32px;color:var(--az2);font-weight:800}
+.kpi.alerta{border-color:var(--vm)}.kpi.alerta strong{color:var(--vm)}
+.card{background:#fff;border-radius:22px;border:2px solid var(--ln);padding:18px;margin-top:16px;overflow-x:auto}
+.card h2{margin:0 0 12px;font-size:17px;color:var(--az2)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{background:var(--az);color:#fff;padding:9px 10px;text-align:left;white-space:nowrap}th:first-child{border-radius:12px 0 0 0}th:last-child{border-radius:0 12px 0 0}
+td{padding:8px 10px;border-bottom:1px solid var(--ln);white-space:nowrap}
+tr.cl{cursor:pointer;transition:background .2s}tr.cl:hover{background:var(--azl)}
+.tag{display:inline-block;padding:3px 11px;border-radius:99px;font-size:12.5px;font-weight:800}
+.dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px}
+.s-INSTALADA{background:#16a34a;color:#fff}.s-CANCELADA{background:#dc2626;color:#fff}.s-PENDENCIADA{background:var(--vm);color:#fff}.s-ANDAMENTO{background:#f59e0b;color:#fff}
+.p-pago{background:#0f766e;color:#fff}.p-nao{background:#a31621;color:#fff}.p-sem{background:#fde8b0;color:#7a5200}.p-prox{background:#e6d4f7;color:#5b2a86}.p-pend{background:#cfe4fb;color:#1c4f8c}
+.bar{display:flex;align-items:center;gap:8px;margin:7px 0}.bar span:first-child{width:110px;font-size:13px}
+.bar i{display:block;height:16px;border-radius:99px;transform-origin:left;animation:grow .8s both}.bar em{font-style:normal;font-size:13px}
+.donut{width:150px;height:150px;border-radius:50%;margin:auto;position:relative;animation:pop .6s both}
+.donut:after{content:"";position:absolute;inset:34px;background:#fff;border-radius:50%}
+.leg{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;margin-top:12px;font-size:13px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tools input,.tools select,.f input,.f select{padding:9px 12px;border-radius:12px;border:2px solid var(--ln);background:#fff;min-width:0}
+.login{max-width:380px;margin:9vh auto;background:#fff;padding:28px;border-radius:26px;border:2px solid var(--ln);animation:pop .6s both;text-align:center}
+.login h1{color:var(--az2);margin:0 0 4px}.login input{width:100%;margin:6px 0;padding:12px;border-radius:14px;border:2px solid var(--ln)}
+.login .btn{width:100%;padding:13px;margin-top:8px}.err{color:var(--vm);min-height:20px}
+.modal{position:fixed;inset:0;background:#14213d99;display:flex;align-items:center;justify-content:center;padding:14px;z-index:9}
+.box{background:#fff;border-radius:24px;max-width:620px;width:100%;max-height:92vh;max-height:92dvh;overflow:auto;padding:22px;-webkit-overflow-scrolling:touch;animation:pop .3s both;border-top:6px solid var(--vm)}
+.f{display:grid;grid-template-columns:1fr 1fr;gap:10px}.f label{display:flex;flex-direction:column;font-size:13px;color:var(--mut);gap:3px}.f .full{grid-column:1/-1}
+.f input,.f select{color:var(--tx);width:100%}
+.actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;position:sticky;bottom:-22px;background:#fff;padding:12px 0 2px;margin-top:8px}
+.hint{background:var(--azl);border-radius:14px;padding:10px 14px;font-size:13.5px;margin-bottom:12px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--az2);color:#fff;padding:12px 22px;border-radius:99px;animation:pop .3s both;z-index:10}
+.lgbg{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative;overflow:hidden;background:linear-gradient(145deg,#1e3a8a,#1d4ed8 60%,#3b82f6)}
+.blob{position:absolute;border-radius:50%;filter:blur(40px);opacity:.55;animation:flutua 14s ease-in-out infinite}
+.b1{width:380px;height:380px;background:#8f1d2c;top:-120px;left:-100px}
+.b2{width:320px;height:320px;background:#60a5fa;bottom:-110px;right:-60px;animation-delay:-5s}
+.b3{width:200px;height:200px;background:#c0344a;top:55%;left:60%;animation-delay:-9s;opacity:.35}
+@keyframes flutua{50%{transform:translate(50px,-40px) scale(1.12) rotate(8deg)}}
+.lgcard{position:relative;background:#ffffffee;backdrop-filter:blur(8px);border-radius:32px;padding:30px 26px;max-width:640px;width:100%;text-align:center;box-shadow:0 30px 70px #0b1b4a66;border-bottom:6px solid var(--vm);animation:pop .6s both}
+.lgcard.small{max-width:380px}
+.lgcard h1{margin:6px 0 2px;color:var(--az2);font-size:clamp(22px,6vw,28px);letter-spacing:.5px;font-weight:800}
+.lgcard h3{margin:18px 0 8px;font-size:14px;color:var(--vm);text-align:left;font-weight:800}
+.sub{color:var(--mut);margin:0 0 4px}
+.logo{width:64px;height:64px;margin:auto;border-radius:22px;background:linear-gradient(135deg,var(--az),var(--vm));display:grid;place-items:center;font-size:30px;animation:balanca 3.5s ease-in-out infinite}
+@keyframes balanca{50%{transform:rotate(-7deg) translateY(-4px)}}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:9px}
+.tile{display:flex;align-items:center;gap:9px;background:#fff;border:2px solid var(--ln);border-radius:16px;padding:9px 10px;color:var(--tx);font-weight:800;font-size:14px;line-height:1.15;text-align:left;min-width:0;transition:.22s;animation:pop .5s both}
+.tile span:last-child{min-width:0;overflow-wrap:normal}
+.tile:hover{border-color:var(--c);transform:translateY(-3px) scale(1.03);box-shadow:0 8px 18px #1d4ed822}
+.av{width:34px;height:34px;flex:none;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:800}
+.av.big{width:84px;height:84px;font-size:36px;margin:8px auto;box-shadow:0 0 0 6px #fff,0 0 0 9px var(--c);animation:pop .5s both}
+.voltar{position:absolute;left:16px;top:16px;border:0;background:var(--azl);color:var(--az2);border-radius:99px;padding:6px 14px;font-weight:800}
+.pw{position:relative;margin-top:10px}.pw input{width:100%;padding:14px 48px 14px 16px;border-radius:16px;border:2px solid var(--ln);font-size:16px}
+.pw input:focus{border-color:var(--az);outline:0}.pw button{position:absolute;right:8px;top:7px;border:0;background:none;font-size:20px}
+.lgcard .btn{width:100%;padding:14px;margin-top:6px;font-size:16px}
+.demo{font-size:12.5px;color:var(--mut)}
+.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+@keyframes pop{from{opacity:0;transform:scale(.96) translateY(8px)}}
+@keyframes grow{from{transform:scaleX(0)}}
+@media(max-width:560px){
+.f{grid-template-columns:1fr}
+.top{padding:12px 14px;gap:8px}.top h1{font-size:17px;flex:1 1 100%}
+.nav{padding:10px 14px;gap:6px}.nav button{padding:8px 13px;font-size:14px}.nav #novo{margin-left:0}
+main{padding:0 14px 32px}
+.mes b{min-width:0;flex:1;font-size:16px}
+.kpi{padding:12px 14px}.kpi strong{font-size:26px}
+.card{padding:14px;border-radius:18px}
+.grid2{grid-template-columns:1fr}
+.lgcard{padding:26px 16px}
+.tiles{grid-template-columns:repeat(2,1fr);gap:8px}.tile{padding:8px;gap:7px;font-size:13.5px}.av{width:30px;height:30px;font-size:14px}
+.modal{padding:8px}.box{padding:16px;border-radius:20px}.actions{bottom:-16px}
+.tools input,.tools select{flex:1 1 100%}
+th,td{padding:8px 8px}
+}
+@media(max-width:400px){.tile{font-size:12.5px;gap:6px;padding:8px 6px}.av{width:26px;height:26px;font-size:13px}}
+@media(max-width:340px){.tiles{grid-template-columns:1fr}}
+
+/* ===== TEMA ESCURO COM REFLEXOS (telas internas) ===== */
+.bgfx{display:none}
+body.dk{--az2:#bcd6ff;--azl:rgba(96,165,250,.14);--bg:#070d1f;--tx:#e8eefc;--mut:#9fb0d3;--ln:rgba(255,255,255,.11);color-scheme:dark;background:#070d1f}
+body.dk .bgfx{display:block;position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:radial-gradient(1200px 700px at 15% -10%,#14275f 0,transparent 60%),radial-gradient(900px 600px at 100% 110%,#3b0f26 0,transparent 55%),#070d1f}
+.bgfx i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.28;animation:flutua 22s ease-in-out infinite}
+.bgfx .a{width:420px;height:420px;background:#2563eb;top:8%;left:-6%}
+.bgfx .b{width:360px;height:360px;background:#9f1239;bottom:-8%;right:6%;animation-delay:-8s}
+.bgfx .c{width:260px;height:260px;background:#7c3aed;top:48%;left:46%;opacity:.16;animation-delay:-14s}
+.bgfx:after{content:"";position:absolute;inset:-30%;background:linear-gradient(115deg,transparent 42%,rgba(160,200,255,.07) 50%,transparent 58%);animation:feixe 16s linear infinite}
+@keyframes feixe{from{transform:translateX(-60%)}to{transform:translateX(60%)}}
+body.dk #app{position:relative;z-index:1}
+body.dk .top{background:linear-gradient(120deg,rgba(30,58,138,.8),rgba(29,78,216,.5));backdrop-filter:blur(10px);border-bottom:3px solid #c0344a}
+body.dk .nav button{background:rgba(255,255,255,.06);color:#dbe7ff;border:2px solid rgba(255,255,255,.14)}
+body.dk .nav button.on{background:#2563eb;color:#fff;border-color:#60a5fa}
+body.dk .nav .btn.vm{background:#c0344a;color:#fff;border-color:#e0455f}
+body.dk .card,body.dk .kpi{background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.12);box-shadow:0 10px 30px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08);backdrop-filter:blur(10px);position:relative;isolation:isolate;overflow:hidden}
+body.dk .card{overflow-x:auto}
+body.dk .card:before,body.dk .kpi:before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%),rgba(150,190,255,.2),transparent 65%);opacity:0;transition:opacity .35s;z-index:-1}
+body.dk .card:hover:before,body.dk .kpi:hover:before{opacity:1}
+body.dk .card:after,body.dk .kpi:after{content:"";position:absolute;top:0;bottom:0;left:0;width:55%;pointer-events:none;background:linear-gradient(105deg,transparent,rgba(255,255,255,.09),transparent);transform:translateX(-130%) skewX(-12deg);animation:sheen 12s ease-in-out infinite;animation-delay:var(--d,0s)}
+@keyframes sheen{0%,62%{transform:translateX(-130%) skewX(-12deg)}100%{transform:translateX(240%) skewX(-12deg)}}
+body.dk main .card:nth-child(2n){--d:3s}body.dk main .card:nth-child(3n){--d:6s}
+body.dk .kpi strong{color:#fff}
+body.dk .kpi.alerta{border-color:#e0455f;box-shadow:0 0 0 1px rgba(224,69,95,.35),0 10px 30px rgba(224,69,95,.18)}
+body.dk .kpi.alerta strong{color:#ff8da1}
+body.dk .hint{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.2);color:#cfe0ff}
+body.dk .card h2{color:#cfe0ff}
+body.dk th{background:rgba(37,99,235,.55)}
+body.dk td{border-bottom-color:rgba(255,255,255,.08)}
+body.dk .donut:after{background:#0d1633}
+body.dk .btn.gh{background:rgba(255,255,255,.06);color:#cfe0ff;border:1px solid rgba(255,255,255,.25)}
+body.dk .btn:hover,body.dk .mes button:hover{background:#3b82f6}
+body.dk .mes button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18)}
+body.dk .mes b{border:1px solid rgba(255,255,255,.25);box-shadow:0 0 24px rgba(255,255,255,.08)}
+body.dk .box{background:#0e1830;border:1px solid rgba(255,255,255,.12);border-top:6px solid #c0344a;color:var(--tx)}
+body.dk .actions{background:#0e1830}
+body.dk .tools input,body.dk .tools select,body.dk .f input,body.dk .f select{background:rgba(255,255,255,.07);color:var(--tx);border-color:rgba(255,255,255,.16)}
+body.dk option{background:#12204a;color:#e8eefc}
+body.dk .toast{background:#1e3a8a;color:#fff}
+body.dk :focus-visible{outline-color:#ffb3c0}
+/* resumo dinâmico */
+.hero{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+.hero .card{margin-top:0}
+.lb{display:block;color:var(--mut);font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.big{display:flex;align-items:center;flex-wrap:wrap;gap:6px 14px;margin:8px 0 16px}
+.big strong{font-size:clamp(56px,9vw,92px);line-height:1;font-weight:800;background:linear-gradient(180deg,#fff,#9ec5ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.vs{color:var(--mut);font-size:13px}
+.dl{display:inline-block;font-size:12.5px;font-weight:800;padding:2px 9px;border-radius:99px;margin-top:6px}
+.big .dl{margin-top:0}
+.dl.ok{background:rgba(34,197,94,.16);color:#6ee7a0}.dl.ruim{background:rgba(239,68,68,.16);color:#ff9a9a}.dl.eq{background:rgba(255,255,255,.08);color:var(--mut)}
+.stack{display:flex;gap:2px;height:16px;border-radius:99px;overflow:hidden;transform-origin:left;animation:grow .9s both}
+.stack.sm{height:10px}.stack i{display:block;min-width:6px}
+.leg2{display:flex;flex-wrap:wrap;gap:6px 16px;margin:10px 0 16px;font-size:13px}.leg2 b{color:#fff}
+.hero-ring{text-align:center}
+.ring{position:relative;width:min(190px,60vw);aspect-ratio:1;margin:12px auto 8px}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg);overflow:visible}
+.ring circle{fill:none;stroke-width:10}
+.rt{stroke:rgba(255,255,255,.09)}
+.rf{stroke-linecap:round;animation:ringin 1.2s cubic-bezier(.2,.8,.2,1) both;filter:drop-shadow(0 0 6px rgba(96,165,250,.55))}
+@keyframes ringin{from{stroke-dasharray:0 327}}
+.rc{position:absolute;inset:0;display:grid;place-items:center}.rc strong{font-size:38px;color:#fff;font-weight:800}
+.mut{color:var(--mut);margin:0 0 10px;font-size:13.5px}
+.days{display:flex;gap:3px;align-items:flex-end}
+.dc{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center}
+.col{height:230px;width:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.col b{font-size:11px;color:#fff;height:15px;line-height:15px}
+.col i{display:block;width:100%;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#60a5fa,#2563eb);transform-origin:bottom;animation:growy .7s both}
+.dc.zero .col i{background:rgba(255,255,255,.12)}
+.dc.best .col i{background:linear-gradient(180deg,#86efac,#16a34a)}
+.dc.hoje .col i{background:linear-gradient(180deg,#f0abfc,#c026d3)}
+.dc span{font-size:11px;color:var(--mut);height:16px;margin-top:4px}
+@keyframes growy{from{transform:scaleY(0)}}
+.rk{display:grid;grid-template-columns:28px minmax(70px,110px) 1fr auto;align-items:center;gap:10px;padding:6px;border-radius:12px}
+.rk[data-loja]{cursor:pointer}.rk[data-loja]:hover{background:rgba(255,255,255,.06)}
+.pos{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:13px;background:rgba(255,255,255,.1)}
+.p1{background:#f5c542;color:#2a1f00}.p2{background:#cbd5e1;color:#1e293b}.p3{background:#d58b4f;color:#2a1300}
+.nm{font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rb{height:10px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}.rb i{display:block;height:100%;border-radius:99px;transform-origin:left;animation:grow .9s both}
+.rk em{font-style:normal;font-size:13px;color:var(--mut);min-width:70px;text-align:right}.rk em b{color:#fff}
+.sec{margin:24px 0 0;font-size:17px;color:#cfe0ff}
+.alts{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-top:10px}
+.alt{display:flex;align-items:center;gap:14px}
+.alt span{min-width:0}.alt span b{color:#fff;display:block;font-size:14px}
+@media(max-width:700px){
+.hero{grid-template-columns:1fr}
+.rk{grid-template-columns:26px minmax(60px,90px) 1fr auto;gap:8px}
+.col b{display:none}.dc.best .col b,.dc.hoje .col b{display:block}
+.col{height:150px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><div class="bgfx" aria-hidden="true"><i class="a"></i><i class="b"></i><i class="c"></i></div><div id="app"></div>
+<script>
+// ====== CONFIGURAÇÃO: cole aqui os dados do seu projeto Supabase (Settings > API) ======
+const SUPA_URL='https://wtnhogejrulrzfwnzmho.supabase.co', SUPA_KEY='sb_publishable_x3kAtxmDXbbosO7Z09mRqQ_nhy51JDL';
+// Sem isso preenchido, o site roda em MODO DEMONSTRAÇÃO (dados só neste navegador).
+const LOJAS=['Boa Vista','Center Sul','Guararapes','Manaíra','North Way','Plaza','Patteo','Recife','Riomar','Tacaruna'];
+const LCOR=['#1d4ed8','#0891b2','#7c3aed','#db2777','#ea580c','#65a30d','#0d9488','#4f46e5','#b91c1c','#ca8a04'];
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const MCOR=['#2563eb','#c026d3','#0d9488','#ea580c','#16a34a','#9333ea','#dc2626','#0284c7','#ca8a04','#be185d','#1e3a8a','#8f1d2c'];
+const STAT={INSTALADA:'Instalada',ANDAMENTO:'Em andamento',PENDENCIADA:'Pendenciada',CANCELADA:'Cancelada'};
+const PESSOAS=[['rivaldo','Rivaldo','#8f1d2c'],['luciene','Luciene','#7c3aed'],['priscylla','Priscylla','#db2777'],['adm','Administrador','#1e3a8a']];
+const slug=s=>s.toLowerCase().normalize('NFD').replace(/[^a-z]/g,'');
+// usuários do modo demonstração (no Supabase eles ficam na tabela "perfis")
+const DEMO={adm:{senha:'adm123',papel:'adm'},rivaldo:{senha:'rivaldo123',papel:'rivaldo'},luciene:{senha:'luciene123',papel:'detalhe'},priscylla:{senha:'priscylla123',papel:'detalhe'}};
+LOJAS.forEach(l=>DEMO[slug(l)]={senha:slug(l)+'123',papel:'loja',loja:l});
+try{const t=JSON.parse(localStorage.getItem('senhas')||'{}');for(const k in t)if(DEMO[k])DEMO[k].senha=t[k]}catch(_){}
+
+const $=s=>document.querySelector(s), e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const parse=s=>{const[a,b,c]=s.split('-');return new Date(+a,+b-1,+c)};
+const br=s=>s?s.split('-').reverse().join('/'):'';
+const sexta=(d,add)=>{const x=new Date(d),m=(x.getDay()+6)%7;x.setDate(x.getDate()+add-m);return x};
+const payday=s=>sexta(parse(s),11);            // sexta da semana seguinte à instalação
+const now=new Date();
+let S={cred:null,user:null,y:now.getFullYear(),m:now.getMonth(),view:'painel',data:[],f:{q:'',loja:'',status:'',pago:''},sb:null};
+
+// ====== situação do pagamento (automática, exceto "Pago", que é marcado à mão) ======
+function pay(o){
+  if(o.status==='CANCELADA')return['Não elegível','p-nao'];
+  if(o.pago)return['Pago','p-pago'];
+  if(o.status!=='INSTALADA'||!o.instalado)return['Pendente instalação','p-pend'];
+  return iso(payday(o.instalado))<=iso(sexta(now,4))?['Será pago essa semana','p-sem']:['Será pago na próxima semana','p-prox'];
+}
+// ====== dados ======
+const DB={
+  async load(){
+    if(S.sb){const{data,error}=await S.sb.rpc('listar',S.cred);if(error)throw error;return data}
+    try{const t=localStorage.getItem('ordens');if(t)return JSON.parse(t)}catch(_){}
+    return seed();
+  },
+  async save(o){
+    if(S.sb){const{error}=await S.sb.rpc('salvar',{...S.cred,o});if(error)throw error}
+    else{const i=S.data.findIndex(x=>x.id===o.id);i<0?S.data.push(o):S.data[i]=o;this.local()}
+  },
+  async del(id){if(S.sb){const{error}=await S.sb.rpc('excluir',{...S.cred,i:id});if(error)throw error;S.data=S.data.filter(x=>x.id!==id)}else{S.data=S.data.filter(x=>x.id!==id);this.local()}},
+  local(){try{localStorage.setItem('ordens',JSON.stringify(S.data))}catch(_){}}
+};
+function seed(){
+  let r=7;const R=n=>(r=(r*9301+49297)%233280)/233280*n|0;
+  const nomes=['Osmar Cardoso','Maria Sonia','Adriano Queiroz','Guilherme Luck','Roberval Paulino','Mariane Lopes','Daniel Chaves','Luciana Camapa','Ladjane Maria','Alexandre Sartori'],cons=['Ricardo','Wandeison','Lenildo','Pedro','Lannart','Thawany','Bruna'],st=['INSTALADA','INSTALADA','INSTALADA','ANDAMENTO','PENDENCIADA','CANCELADA'];
+  const out=[];for(let i=0;i<70;i++){const d=new Date(now.getFullYear(),now.getMonth()-R(2),1+R(27)),s=st[R(6)];
+    const o={id:'d'+i,data:iso(d),loja:LOJAS[R(10)],cliente:nomes[R(10)]+' '+(i+1),cpf:String(10000000000+R(8e8)).slice(0,11),ordem:'1-'+(9e8+R(1e8)),plano:R(5)?'COMBO':'AVULSA',status:s,info:s==='INSTALADA'?'':'Aguardando cliente',instalado:s==='INSTALADA'?iso(new Date(d.getTime()+864e5*(1+R(4)))):'',consultor:cons[R(7)],pago:false};
+    if(o.instalado&&iso(payday(o.instalado))<iso(sexta(now,4))&&R(4))o.pago=true;out.push(o)}
+  return out;
+}
+// ====== permissões ======
+const U=()=>S.user,vendoTudo=()=>U().papel!=='loja',podeEditar=()=>['loja','rivaldo','adm'].includes(U().papel),detalhado=()=>['detalhe','adm'].includes(U().papel);
+const visiveis=()=>S.data.filter(o=>vendoTudo()||o.loja===U().loja);
+const doMes=()=>visiveis().filter(o=>{const d=parse(o.data);return d.getFullYear()===S.y&&d.getMonth()===S.m});
+const lc=l=>LCOR[LOJAS.indexOf(l)]||'#64748b';
+const toast=t=>{const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.append(d);setTimeout(()=>d.remove(),2600)};
+
+// ====== telas ======
+function login(msg=''){
+  document.body.classList.remove('dk');
+  const pessoas=PESSOAS;
+  const tile=(k,n,c,i)=>`<button class="tile" data-k="${k}" style="--c:${c};animation-delay:${i*45}ms"><span class="av">${n[0]}</span><span>${n}</span></button>`;
+  const passo1=()=>{
+    $('#app').innerHTML=`<div class="lgbg"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i>
+    <div class="lgcard"><div class="logo">📈</div><h1>BACKLOG NORDESTÃO</h1><p class="sub">${msg||'Quem está entrando? Toque no seu nome ou na sua loja.'}</p>
+    <h3>Lojas</h3><div class="tiles">${LOJAS.map((l,i)=>tile(slug(l),l,lc(l),i)).join('')}</div>
+    <h3>Equipe</h3><div class="tiles">${pessoas.map((p,i)=>tile(p[0],p[1],p[2],i+10)).join('')}</div></div></div>`;
+    document.querySelectorAll('.tile').forEach(b=>b.onclick=()=>passo2(b.dataset.k,b.querySelector('span:last-child').textContent,b.style.getPropertyValue('--c')));
+  };
+  const passo2=(k,nome,cor)=>{
+    $('#app').innerHTML=`<div class="lgbg"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i>
+    <div class="lgcard small"><button class="voltar" id="vt">‹ Trocar</button><div class="av big" style="--c:${cor}">${nome[0]}</div><h1>${e(nome)}</h1>
+    <p class="sub">Digite a senha para entrar</p><div class="pw"><input id="p" type="password" placeholder="Senha" autocomplete="current-password" autofocus><button id="ver" aria-label="Mostrar senha" type="button">👁</button></div>
+    <div class="err" id="er"></div><button class="btn" id="go">Entrar</button>
+    ${S.sb||DEMO[k].senha!==k+'123'?'':`<p class="demo">Modo demonstração: a senha é <b>${k}123</b></p>`}</div></div>`;
+    $('#vt').onclick=()=>{msg='';passo1()};
+    $('#ver').onclick=()=>{const p=$('#p');p.type=p.type==='password'?'text':'password'};
+    const go=async()=>{
+      try{
+        if(S.sb){const{data,error}=await S.sb.rpc('entrar',{k,s:$('#p').value});if(error)throw error;S.user={nome:data.nome,papel:data.papel,loja:data.loja}}
+        else{const d=DEMO[k];if(!d||d.senha!==$('#p').value)throw 0;S.user={nome,papel:d.papel,loja:d.loja}}
+        S.cred={k,s:$('#p').value};S.data=await DB.load();S.view='painel';draw();
+      }catch(_){const c=$('.lgcard');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');$('#er').textContent='Senha incorreta. Confira e tente de novo.';$('#p').select()}};
+    $('#go').onclick=go;$('#p').addEventListener('keydown',ev=>{if(ev.key==='Enter')go()});setTimeout(()=>$('#p')&&$('#p').focus(),50);
+  };
+  passo1();
+}
+function stats(L){const t=L.length,c=L.filter(o=>o.status==='INSTALADA').length;
+  return{t,and:L.filter(o=>o.status==='ANDAMENTO').length,c,pen:L.filter(o=>o.status==='PENDENCIADA').length,can:L.filter(o=>o.status==='CANCELADA').length,pct:t?(c/t*100).toFixed(1).replace('.',',')+'%':'—',cb:L.filter(o=>o.plano==='COMBO').length,av:L.filter(o=>o.plano==='AVULSA').length}}
+const bars=(rows,cor)=>{const mx=Math.max(1,...rows.map(r=>r[1]));return rows.map(r=>`<div class="bar"><span>${e(r[0])}</span><i style="width:${Math.max(4,r[1]/mx*55)}%;background:${r[2]||cor}"></i><em>${r[1]}</em></div>`).join('')||'<p>Sem dados neste mês.</p>'};
+const count=(L,f)=>Object.entries(L.reduce((a,o)=>(a[f(o)]=(a[f(o)]||0)+1,a),{})).sort((a,b)=>b[1]-a[1]);
+function donut(items){const tot=items.reduce((a,i)=>a+i[1],0)||1;let ac=0;
+  const g=items.map(i=>{const s=ac;ac+=i[1]/tot*100;return`${i[2]} ${s}% ${ac}%`}).join(',');
+  return`<div class="donut" style="background:conic-gradient(${g||'#dbe4f7 0 100%'})"></div><div class="leg">${items.map(i=>`<span><span class="dot" style="background:${i[2]}"></span>${i[0]}: ${i[1]}</span>`).join('')}</div>`}
+function draw(){
+  document.body.classList.add('dk');
+  const L=doMes(),s=stats(L),cor=MCOR[S.m],pg=S.view;
+  const tab=(v,t)=>`<button class="${pg===v?'on':''}" data-v="${v}">${t}</button>`;
+  $('#app').innerHTML=`<div class="top"><h1>BACKLOG NORDESTÃO${U().loja?' · '+e(U().loja):''}</h1><span>Olá, ${e(U().nome)}</span><button class="btn gh" id="sair">Sair</button></div>
+  <div class="nav">${tab('painel','Resumo')}${tab('ordens','Todas as vendas')}${tab('pendenciadas','Pendenciadas')}${U().papel==='adm'?tab('acessos','Acessos e senhas'):''}${podeEditar()?'<button class="btn vm" id="novo" style="margin-left:auto">+ Nova venda</button>':''}</div><main>
+  ${pg==='pendenciadas'||pg==='acessos'?'':`<div class="mes"><button id="ant" aria-label="Mês anterior">‹</button><b style="background:${cor}">${MESES[S.m]} ${S.y}</b><button id="prox" aria-label="Próximo mês">›</button></div>`}
+  <div id="v"></div></main>`;
+  document.querySelectorAll('.nav [data-v]').forEach(b=>b.onclick=()=>{S.view=b.dataset.v;if(b.dataset.v!=='ordens')S.f={q:'',loja:'',status:'',pago:''};draw()});
+  $('#sair').onclick=async()=>{S.user=null;S.cred=null;login()};
+  if($('#novo'))$('#novo').onclick=()=>form();
+  if($('#ant'))$('#ant').onclick=()=>{S.m--;if(S.m<0){S.m=11;S.y--}draw()};
+  if($('#prox'))$('#prox').onclick=()=>{S.m++;if(S.m>11){S.m=0;S.y++}draw()};
+  ({painel,ordens,pendenciadas,acessos})[pg](L,s);
+}
+function go(f){S.f={q:'',loja:'',status:'',pago:'',...f};S.view='ordens';draw()}
+const prevL=()=>{let y=S.y,m=S.m-1;if(m<0){m=11;y--}return visiveis().filter(o=>{const d=parse(o.data);return d.getFullYear()===y&&d.getMonth()===m})};
+const dl=(a,b,bad,neu)=>{const d=a-b;if(!d)return'<span class="dl eq" title="Igual ao mês anterior">• igual</span>';const up=d>0;return`<span class="dl ${neu?'eq':(bad?!up:up)?'ok':'ruim'}" title="Comparado ao mês anterior">${up?'▲':'▼'} ${Math.abs(d)}</span>`};
+function countUp(){
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
+  document.querySelectorAll('[data-n]').forEach(el=>{const to=+el.dataset.n,d=+(el.dataset.d||0),suf=el.dataset.s||'',t0=performance.now();
+    const f=t=>{const k=Math.min(1,(t-t0)/900),v=to*(1-Math.pow(1-k,3));el.textContent=v.toFixed(d).replace('.',',')+suf;if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)});
+}
+document.addEventListener('pointermove',ev=>{const c=ev.target.closest&&ev.target.closest('.card,.kpi');if(!c)return;const r=c.getBoundingClientRect();c.style.setProperty('--mx',(ev.clientX-r.left)+'px');c.style.setProperty('--my',(ev.clientY-r.top)+'px')},{passive:true});
+function painel(L,s){
+  const P=prevL(),ps=stats(P),pct=s.t?s.c/s.t*100:0,ppct=ps.t?ps.c/ps.t*100:0,dpp=pct-ppct;
+  const dias=new Date(S.y,S.m+1,0).getDate(),porDia=Array(dias).fill(0);L.forEach(o=>porDia[parse(o.data).getDate()-1]++);
+  const mx=Math.max(1,...porDia),best=Math.max(...porDia),bi=porDia.indexOf(best),isCur=S.y===now.getFullYear()&&S.m===now.getMonth(),hoje=now.getDate();
+  const K=(i,l,v,pv,f,x,bad,attr,neu)=>`<button class="kpi ${x||''}" ${attr||`data-f='${JSON.stringify(f)}'`} style="--d:${i*1.7}s;animation-delay:${i*70}ms"><small>${l}</small><strong data-n="${v}">${v}</strong>${dl(v,pv,bad,neu)}</button>`;
+  const SEG=[['Instaladas',s.c,'#22c55e'],['Em andamento',s.and,'#f59e0b'],['Pendenciadas',s.pen,'#e0455f'],['Canceladas',s.can,'#8b9bb5']];
+  const MIX=[['Combo',s.cb,'#60a5fa'],['Avulsa',s.av,'#f0abfc']];
+  const stack=(a,sm)=>`<div class="stack${sm?' sm':''}">${a.filter(x=>x[1]>0).map(x=>`<i style="flex:${x[1]};background:${x[2]}" title="${x[0]}: ${x[1]}"></i>`).join('')||'<i style="flex:1;background:rgba(255,255,255,.1)"></i>'}</div><div class="leg2">${a.map(x=>`<span><span class="dot" style="background:${x[2]}"></span>${x[0]} <b>${x[1]}</b></span>`).join('')}</div>`;
+  const ppChip=ps.t?`<span class="dl ${dpp>0?'ok':dpp<0?'ruim':'eq'}" title="Comparado ao mês anterior">${dpp>0?'▲':dpp<0?'▼':'•'} ${Math.abs(dpp).toFixed(1).replace('.',',')} p.p.</span>`:'';
+  let h=`<div class="hint">Toque em um número para ver as vendas dele. A comissão é paga sempre na <b>sexta-feira da semana seguinte</b> à instalação.</div>
+  <div class="hero"><div class="card"><span class="lb">Vendas em ${MESES[S.m]}</span>
+    <div class="big"><strong data-n="${s.t}">${s.t}</strong>${dl(s.t,ps.t)}<span class="vs">vs ${ps.t} no mês anterior</span></div>
+    ${stack(SEG)}${stack(MIX,true)}</div>
+  <div class="card hero-ring"><span class="lb">Taxa de instalação</span>
+    <div class="ring"><svg viewBox="0 0 120 120" aria-hidden="true"><defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#22c55e"/></linearGradient></defs><circle cx="60" cy="60" r="52" class="rt"/>${pct>0?`<circle cx="60" cy="60" r="52" class="rf" stroke="url(#rg)" style="stroke-dasharray:${(pct*3.2673).toFixed(1)} 327"/>`:''}</svg>
+    <div class="rc"><strong data-n="${pct.toFixed(1)}" data-d="1" data-s="%">${s.pct}</strong></div></div>
+    <p class="mut" style="margin:0">${s.c} de ${s.t} vendas instaladas</p>${ppChip}</div></div>
+  <div class="kpis" style="margin-top:16px">${K(0,'Em andamento',s.and,ps.and,{status:'ANDAMENTO'},'',false,'',true)}${K(1,'Instaladas',s.c,ps.c,{status:'INSTALADA'})}${K(2,'Pendenciadas · ver todas',s.pen,ps.pen,null,'alerta',true,'data-pen="1"')}${K(3,'Canceladas',s.can,ps.can,{status:'CANCELADA'},'',true)}</div>`;
+  const dayChart=`<div class="card"><h2>Ritmo do mês</h2><p class="mut">${best?`Melhor dia: <b style="color:#86efac">${String(bi+1).padStart(2,'0')}/${String(S.m+1).padStart(2,'0')}</b> com ${best} venda(s)`:'Sem vendas neste mês.'}${isCur?' · <b style="color:#f0abfc">hoje</b> em rosa':''}</p>
+    <div class="days">${porDia.map((n,i)=>`<div class="dc${n?'':' zero'}${n&&n===best&&i===bi?' best':''}${isCur&&i+1===hoje?' hoje':''}" title="Dia ${i+1}: ${n} venda(s)"><div class="col"><b>${n||''}</b><i style="height:${n?(n/mx*85)+'%':'3px'};animation-delay:${i*18}ms"></i></div><span>${(i===0||(i+1)%5===0)?i+1:''}</span></div>`).join('')}</div></div>`;
+  const rows=vendoTudo()?LOJAS.map(l=>{const x=stats(L.filter(o=>o.loja===l));return[l,x.t,lc(l),x.pct,true]}):count(L,o=>o.consultor||'—').map(r=>{const x=stats(L.filter(o=>(o.consultor||'—')===r[0]));return[r[0],r[1],'#60a5fa',x.pct,false]});
+  rows.sort((a,b)=>b[1]-a[1]);const rmx=Math.max(1,...rows.map(r=>r[1]));
+  const rank=`<div class="card"><h2>${vendoTudo()?'Ranking de lojas':'Ranking de consultores'}</h2>${rows.map((r,i)=>`<div class="rk" ${r[4]?`data-loja="${e(r[0])}"`:''}><b class="pos${i<3&&r[1]?' p'+(i+1):''}">${i+1}</b><span class="nm" title="${e(r[0])}">${e(r[0])}</span><span class="rb"><i style="width:${r[1]/rmx*100}%;background:${r[2]};animation-delay:${i*50}ms"></i></span><em><b>${r[1]}</b> · ${r[3]}</em></div>`).join('')||'<p class="mut">Sem dados neste mês.</p>'}</div>`;
+  h+=`<div class="grid2" style="margin-top:0">${dayChart}${rank}</div>`;
+  const pend=visiveis().filter(o=>o.status==='PENDENCIADA'),idade=pend.length?Math.max(...pend.map(o=>Math.floor((now-parse(o.data))/864e5))):0;
+  const par=L.filter(o=>o.status==='ANDAMENTO'&&(now-parse(o.data))/864e5>7).length;
+  const sem=detalhado()?L.filter(o=>pay(o)[0]==='Será pago essa semana').length:0;
+  const A=(n,t,sub,attr,x)=>`<button class="kpi alt ${x||''}" ${attr} ><strong data-n="${n}">${n}</strong><span><b>${t}</b><small>${sub}</small></span></button>`;
+  const alts=[pend.length?A(pend.length,'pendenciadas aguardando solução',`a mais antiga tem ${idade} dia(s)`,'data-pen="1"','alerta'):'',par?A(par,'em andamento há mais de 7 dias','vale cobrar a instalação','data-act="par"'):'',sem?A(sem,'comissões serão pagas essa semana','toque para ver quais','data-act="sem"'):''].join('');
+  h+=`<h2 class="sec">Fique de olho</h2>${alts?`<div class="alts">${alts}</div>`:'<div class="hint" style="margin-top:10px">Tudo em dia: nenhuma pendência para acompanhar.</div>'}`;
+  if(vendoTudo()){
+    h+=`<div class="card"><h2>Resultado por loja</h2><table><tr><th>Loja<th>Total<th>Andamento<th>Instaladas<th>Pendenc.<th>Cancel.<th>% sucesso<th>Combos<th>Avulsas</tr>`+
+    LOJAS.map(l=>{const x=stats(L.filter(o=>o.loja===l));return`<tr class="cl" data-loja="${l}"><td><span class="dot" style="background:${lc(l)}"></span>${l}<td>${x.t}<td>${x.and}<td>${x.c}<td>${x.pen}<td>${x.can}<td>${x.pct}<td>${x.cb}<td>${x.av}</tr>`}).join('')+
+    `<tr style="font-weight:800;background:var(--azl)"><td>TOTAL<td>${s.t}<td>${s.and}<td>${s.c}<td>${s.pen}<td>${s.can}<td>${s.pct}<td>${s.cb}<td>${s.av}</tr></table></div>`;
+  }
+  if(detalhado()){
+    const PG=count(L,o=>pay(o)[0]),pc={'Pago':'#14b8a6','Não elegível':'#e0455f','Será pago essa semana':'#f0b429','Será pago na próxima semana':'#a66bd6','Pendente instalação':'#5aa0e6'};
+    const val=L.filter(o=>o.status==='INSTALADA'&&!o.pago);
+    h+=`<div class="grid2"><div class="card"><h2>Pagamentos (visão detalhada)</h2>${donut(PG.map(p=>[p[0],p[1],pc[p[0]]]))}</div>
+    <div class="card"><h2>Vendas por consultor</h2>${bars(count(L,o=>o.consultor||'—'),'#60a5fa')}</div></div>
+    <div class="card"><h2>Próximas sextas de pagamento</h2><table><tr><th>Sexta<th>Vendas a pagar</tr>${Object.entries(val.reduce((a,o)=>{const k=iso(payday(o.instalado));a[k]=(a[k]||0)+1;return a},{})).sort().map(([k,n])=>`<tr><td>${br(k)}<td>${n}</tr>`).join('')||'<tr><td colspan=2>Nada a pagar neste mês.</tr>'}</table></div>`;
+  }
+  $('#v').innerHTML=h;
+  document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>go(JSON.parse(b.dataset.f)));
+  document.querySelectorAll('[data-pen]').forEach(b=>b.onclick=()=>{S.view='pendenciadas';draw()});
+  document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>go(b.dataset.act==='par'?{status:'ANDAMENTO'}:{pago:'Será pago essa semana'}));
+  document.querySelectorAll('tr[data-loja],.rk[data-loja]').forEach(r=>r.onclick=()=>go({loja:r.dataset.loja}));
+  countUp();
+}
+function tabela(L,msg){
+  return`<table><tr><th>Data<th>Loja<th>Cliente<th>CPF<th>Plano<th>Status<th>Informações<th>Instalado em<th>Consultor<th>Pagamento</tr>`+
+  (L.map(o=>{const p=pay(o);return`<tr class="cl" data-id="${o.id}"><td>${br(o.data)}<td><span class="dot" style="background:${lc(o.loja)}"></span>${e(o.loja)}<td>${e(o.cliente)}<td>${e(o.cpf)}<td>${o.plano}<td><span class="tag s-${o.status}">${STAT[o.status]}</span><td>${e(o.info)}<td>${br(o.instalado)}<td>${e(o.consultor)}<td><span class="tag ${p[1]}">${p[0]}</span></tr>`}).join('')||`<tr><td colspan=10>${msg}</tr>`)+'</table>'}
+const abrir=()=>document.querySelectorAll('tr[data-id]').forEach(r=>r.onclick=()=>form(S.data.find(o=>o.id===r.dataset.id)));
+function ordens(L){
+  const f=S.f;
+  $('#v').innerHTML=`<div class="card"><div class="tools"><input id="q" placeholder="Buscar por nome, CPF ou ordem" value="${e(f.q)}">
+  ${vendoTudo()?`<select id="fl"><option value="">Todas as lojas${LOJAS.map(l=>`<option ${f.loja===l?'selected':''}>${l}`).join('')}</select>`:''}
+  <select id="fs"><option value="">Todos os status${Object.entries(STAT).map(([k,v])=>`<option value="${k}" ${f.status===k?'selected':''}>${v}`).join('')}</select>
+  <select id="fp"><option value="">Todos os pagamentos${['Pago','Será pago essa semana','Será pago na próxima semana','Pendente instalação','Não elegível'].map(v=>`<option ${f.pago===v?'selected':''}>${v}`).join('')}</select></div>
+  <div id="res"></div></div>`;
+  const lista=()=>{const f=S.f,q=f.q.toLowerCase();
+    const R=L.filter(o=>(!f.loja||o.loja===f.loja)&&(!f.status||o.status===f.status)&&(!f.pago||pay(o)[0]===f.pago)&&(!q||(o.cliente+o.cpf+o.ordem).toLowerCase().includes(q)));
+    $('#res').innerHTML=`<p style="color:var(--mut)">${R.length} venda(s). ${podeEditar()?'Toque em uma linha para editar.':'Toque em uma linha para ver os detalhes.'}</p>${tabela(R,'Nenhuma venda encontrada com esses filtros.')}`;abrir()};
+  const ap=()=>{S.f={q:$('#q').value,loja:$('#fl')?.value||'',status:$('#fs').value,pago:$('#fp').value};lista()};
+  ['fl','fs','fp'].forEach(i=>$('#'+i)&&($('#'+i).onchange=ap));
+  $('#q').oninput=ap;
+  lista();
+}
+function acessos(){
+  const all=[...LOJAS.map(l=>[slug(l),l,'Loja',lc(l)]),...PESSOAS.map(p=>[p[0],p[1],p[0]==='adm'?'Administrador':'Equipe',p[2]])];
+  $('#v').innerHTML=`<div class="card"><h2>Acessos e senhas</h2><p class="hint">Escolha quem vai receber uma senha nova e toque em "Redefinir senha". A nova senha vale na hora.</p><table><tr><th>Quem<th>Tipo<th></tr>${all.map(a=>`<tr><td><span class="dot" style="background:${a[3]}"></span>${e(a[1])}<td>${a[2]}<td><button class="btn" data-k="${a[0]}" data-n="${e(a[1])}">Redefinir senha</button></tr>`).join('')}</table></div>`;
+  document.querySelectorAll('button[data-k]').forEach(b=>b.onclick=()=>{
+    const m=document.createElement('div');m.className='modal';
+    m.innerHTML=`<div class="box"><h2 style="margin-top:0;color:var(--az2)">Nova senha de ${b.dataset.n}</h2><div class="f"><label class="full">Digite a nova senha (mínimo 4 caracteres)<input id="ns" type="text" autocomplete="off"></label></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="btn gh" id="x">Cancelar</button><button class="btn" id="ok">Salvar senha</button></div></div>`;
+    document.body.append(m);$('#ns').focus();$('#x').onclick=()=>m.remove();
+    $('#ok').onclick=async()=>{const n=$('#ns').value;if(n.length<4){toast('A senha precisa ter pelo menos 4 caracteres.');return}
+      try{if(S.sb){const{error}=await S.sb.rpc('senha_definir',{...S.cred,alvo:b.dataset.k,nova:n});if(error)throw error}
+        else{DEMO[b.dataset.k].senha=n;const t=JSON.parse(localStorage.getItem('senhas')||'{}');t[b.dataset.k]=n;localStorage.setItem('senhas',JSON.stringify(t));
+          if(b.dataset.k==='adm')S.cred.s=n}
+        if(S.sb&&b.dataset.k===S.cred.k)S.cred.s=n;
+        m.remove();toast('Senha de '+b.dataset.n+' atualizada')}catch(_){toast('Não foi possível trocar a senha. Tente de novo.')}};
+  });
+}
+function pendenciadas(){
+  const R=visiveis().filter(o=>o.status==='PENDENCIADA').sort((a,b)=>b.data.localeCompare(a.data));
+  $('#v').innerHTML=`<div class="card"><h2>Todas as vendas pendenciadas (todos os meses)</h2><p style="color:var(--mut)">${R.length} venda(s) aguardando solução. Toque para atualizar o status.</p>${tabela(R,'Nenhuma pendenciada. Tudo certo!')}</div>`;abrir();
+}
+function form(o){
+  const novo=!o;o=o||{id:'n'+Date.now(),data:iso(now),loja:U().loja||LOJAS[0],cliente:'',cpf:'',ordem:'',plano:'COMBO',status:'ANDAMENTO',info:'',instalado:'',consultor:'',pago:false};
+  const ro=!podeEditar()||(U().papel==='loja'&&o.loja!==U().loja),dis=ro?'disabled':'';
+  const I=(k,l,t='text',x='')=>`<label class="${x}">${l}<input type="${t}" id="f_${k}" value="${e(o[k])}" ${dis}></label>`;
+  const SEL=(k,l,opts)=>`<label>${l}<select id="f_${k}" ${dis||(k==='loja'&&!vendoTudo()?'disabled':'')}>${opts.map(([v,t])=>`<option value="${v}" ${o[k]===v?'selected':''}>${t}`).join('')}</select></label>`;
+  const m=document.createElement('div');m.className='modal';
+  m.innerHTML=`<div class="box"><h2 style="margin-top:0;color:var(--az2)">${novo?'Nova venda':ro?'Detalhes da venda':'Editar venda'}</h2><div class="f">
+  ${I('data','Data da venda','date')}${SEL('loja','Loja',LOJAS.map(l=>[l,l]))}${I('cliente','Nome do cliente','text','full')}${I('cpf','CPF')}${I('ordem','Número da ordem')}
+  ${SEL('plano','Plano',[['COMBO','Combo'],['AVULSA','Avulsa']])}${SEL('status','Status',Object.entries(STAT))}${I('instalado','Data da instalação','date')}${I('consultor','Consultor')}${I('info','Informações adicionais','text','full')}
+  <label class="full" style="flex-direction:row;align-items:center;gap:8px;font-size:15px;color:var(--tx)"><input type="checkbox" id="f_pago" ${o.pago?'checked':''} ${dis} style="width:auto"> Comissão já foi paga</label></div>
+  <p class="hint" id="ph" style="margin-top:12px"></p>
+  <div class="actions"><button class="btn gh" id="x">${ro?'Fechar':'Cancelar'}</button>
+  ${!ro&&!novo&&['adm','rivaldo'].includes(U().papel)?'<button class="btn vm" id="del">Excluir</button>':''}${ro?'':'<button class="btn" id="ok">Salvar</button>'}</div></div>`;
+  document.body.append(m);
+  const lerF=()=>{['data','loja','cliente','cpf','ordem','plano','status','info','instalado','consultor'].forEach(k=>o[k]=$('#f_'+k).value.trim());o.pago=$('#f_pago').checked};
+  const prev=()=>{lerF();const p=pay(o);$('#ph').innerHTML=`Pagamento: <span class="tag ${p[1]}">${p[0]}</span>${o.status==='INSTALADA'&&o.instalado?' · sexta de pagamento: <b>'+br(iso(payday(o.instalado)))+'</b>':''}`};
+  m.querySelectorAll('input,select').forEach(i=>i.oninput=prev);prev();
+  $('#x').onclick=()=>m.remove();
+  if($('#del'))$('#del').onclick=async()=>{if(confirm('Excluir esta venda? Não dá para desfazer.')){try{await DB.del(o.id);m.remove();draw();toast('Venda excluída')}catch(_){toast('Não foi possível excluir. Tente de novo.')}}};
+  if($('#ok'))$('#ok').onclick=async()=>{lerF();
+    if(!o.cliente||!o.data){toast('Preencha a data e o nome do cliente.');return}
+    if(o.status==='INSTALADA'&&!o.instalado){toast('Informe a data da instalação.');return}
+    try{await DB.save({...o,instalado:o.instalado||null});if(!o.instalado)o.instalado='';m.remove();if(S.sb)S.data=await DB.load();draw();toast('Venda salva')}catch(_){toast('Não foi possível salvar. Tente de novo.')}};
+}
+// ====== início ======
+if(SUPA_URL&&SUPA_KEY&&window.supabase)S.sb=window.supabase.createClient(SUPA_URL,SUPA_KEY);
+login();
+</script></body></html>
